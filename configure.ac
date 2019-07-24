@@ -22,6 +22,7 @@ LT_INIT # Required for systemd linking
 # Checks for libraries.
 PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 AC_CHECK_HEADER([blobs-ipmid], [AC_MSG_ERROR(["phosphor-ipmi-blobs required and not found."])])
+AC_CHECK_HEADER([rrd], [AC_MSG_ERROR(["rrdtool required and not found."])])
 
 # Check/set gtest specific functions.
 PKG_CHECK_MODULES([GTEST], [gtest], [], [AC_MSG_NOTICE([gtest not found, tests will not build])])
