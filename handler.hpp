@@ -3,6 +3,7 @@
 #include <blobs-ipmid/blobs.hpp>
 #include <cstdint>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 using std::size_t;
@@ -40,6 +41,14 @@ class RrdBlobHandler : public GenericBlobInterface
     bool close(uint16_t session) override;
     bool stat(uint16_t session, struct BlobMeta* meta) override;
     bool expire(uint16_t session) override;
+
+    static const std::string blobId;
+    static const uint16_t requiredOpenFlags =
+        OpenFlags::read | OpenFlags::write;
+
+  private:
+    /* set of open sessionIds. */
+    std::unordered_set<uint16_t> sessions_;
 };
 
 } // namespace blobs
