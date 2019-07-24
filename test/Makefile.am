@@ -11,7 +11,8 @@ AM_LDFLAGS = \
 # Run all 'check' test programs
 check_PROGRAMS = \
 	handler_unittest \
-	handler_session_unittest
+	handler_session_unittest \
+	handler_buffer_unittest
 TESTS = $(check_PROGRAMS)
 
 handler_unittest_SOURCES = handler_unittest.cpp
@@ -19,3 +20,6 @@ handler_unittest_LDADD = $(top_builddir)/libhandler.la
 
 handler_session_unittest_SOURCES = handler_session_unittest.cpp
 handler_session_unittest_LDADD = $(top_builddir)/libhandler.la
+
+handler_buffer_unittest_SOURCES = handler_buffer_unittest.cpp
+handler_buffer_unittest_LDADD = $(top_builddir)/libhandler.la

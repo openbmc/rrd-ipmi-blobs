@@ -1,5 +1,6 @@
 #include "handler.hpp"
 
+#include <algorithm>
 #include <phosphor-logging/elog.hpp>
 
 namespace blobs
@@ -47,22 +48,66 @@ bool RrdBlobHandler::open(uint16_t session, uint16_t flags,
         return false;
     }
 
-    return sessions_.emplace(session).second;
+    return sessions_.emplace(session, SessionState{}).second;
 }
 
 std::vector<uint8_t> RrdBlobHandler::read(uint16_t session, uint32_t offset,
                                           uint32_t requestedSize)
 {
-    // TODO: implement
-    std::vector<uint8_t> result;
-    return result;
+    auto it = sessions_.find(session);
+
+    if (it == sessions_.end())
+    {
+        log<level::ERR>("Session not found", entry("SESSION=%d", session));
+        return {};
+    }
+
+    auto& buffer = it->second.buffer;
+
+    if (offset >= buffer.size())
+    {
+        log<level::ERR>("Read past the end of the buffer",
+                        entry("BUFFER_SIZE=%d", buffer.size()),
+                        entry("REQUESTED_OFFSET=%d", offset));
+        return {};
+    }
+
+    auto readBegin = buffer.begin() + offset;
+    uint32_t remainingSize = buffer.end() - readBegin;
+
+    return {readBegin, readBegin + std::min(requestedSize, remainingSize)};
 }
 
 bool RrdBlobHandler::write(uint16_t session, uint32_t offset,
                            const std::vector<uint8_t>& data)
 {
-    // TODO: implement
-    return false;
+    auto it = sessions_.find(session);
+
+    if (it == sessions_.end())
+    {
+        log<level::ERR>("Session not found", entry("SESSION=%d", session));
+        return false;
+    }
+
+    auto& buffer = it->second.buffer;
+
+    if (offset > buffer.size())
+    {
+        log<level::ERR>("Write offset past end of buffer",
+                        entry("BUFFER_SIZE=%d", buffer.size()),
+                        entry("REQUESTED_OFFSET=%d", offset));
+        return false;
+    }
+
+    auto requiredSize = offset + data.size();
+
+    if (requiredSize > buffer.size())
+    {
+        buffer.resize(requiredSize);
+    }
+
+    std::copy(data.begin(), data.end(), buffer.begin() + offset);
+    return true;
 }
 
 bool RrdBlobHandler::writeMeta(uint16_t session, uint32_t offset,

@@ -5,7 +5,6 @@ using blobs::OpenFlags;
 class RrdBlobHandlerSessionTest : public RrdBlobHandlerTest
 {
   protected:
-    const uint16_t sess = 1337;
     const uint16_t maxSessions = RrdBlobHandler::maxSessions;
 
     const uint16_t r = OpenFlags::read;

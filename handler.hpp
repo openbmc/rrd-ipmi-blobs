@@ -3,7 +3,7 @@
 #include <blobs-ipmid/blobs.hpp>
 #include <cstdint>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 using std::size_t;
@@ -48,8 +48,13 @@ class RrdBlobHandler : public GenericBlobInterface
         OpenFlags::read | OpenFlags::write;
 
   private:
-    /* set of open sessionIds. */
-    std::unordered_set<uint16_t> sessions_;
+    struct SessionState
+    {
+        std::vector<uint8_t> buffer;
+    };
+
+    /* map of sessionId: request/response buffer. */
+    std::unordered_map<uint16_t, SessionState> sessions_;
 };
 
 } // namespace blobs
