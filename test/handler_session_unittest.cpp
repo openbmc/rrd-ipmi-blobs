@@ -6,6 +6,8 @@ class RrdBlobHandlerSessionTest : public RrdBlobHandlerTest
 {
   protected:
     const uint16_t sess = 1337;
+    const uint16_t maxSessions = RrdBlobHandler::maxSessions;
+
     const uint16_t r = OpenFlags::read;
     const uint16_t w = OpenFlags::write;
 };
@@ -35,15 +37,20 @@ TEST_F(RrdBlobHandlerSessionTest, OpenCloseMultiple)
 {
     // Test open and close multi-session support / tracking
 
-    const int numSessions = 10;
-
-    for (int i = 0; i < numSessions; ++i)
+    for (int i = 0; i < 2; ++i)
     {
-        EXPECT_TRUE(handler.open(i, r | w, blobId)) << "Open session #" << i;
-    }
+        for (int j = 0; j < maxSessions; ++j)
+        {
+            EXPECT_TRUE(handler.open(j, r | w, blobId))
+                << "Open session #" << j;
+        }
 
-    for (int i = 0; i < numSessions; ++i)
-    {
-        EXPECT_TRUE(handler.close(i)) << "Close session #" << i;
+        EXPECT_FALSE(handler.open(maxSessions, r | w, blobId))
+            << "Enforce max sessions";
+
+        for (int j = 0; j < maxSessions; ++j)
+        {
+            EXPECT_TRUE(handler.close(j)) << "Close session #" << j;
+        }
     }
 }

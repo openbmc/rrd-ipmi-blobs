@@ -43,6 +43,7 @@ class RrdBlobHandler : public GenericBlobInterface
     bool expire(uint16_t session) override;
 
     static const std::string blobId;
+    static constexpr uint16_t maxSessions = 10;
     static const uint16_t requiredOpenFlags =
         OpenFlags::read | OpenFlags::write;
 

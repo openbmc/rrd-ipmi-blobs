@@ -40,6 +40,13 @@ bool RrdBlobHandler::open(uint16_t session, uint16_t flags,
         return false;
     }
 
+    if (sessions_.size() >= maxSessions)
+    {
+        log<level::ERR>("Max sessions already open",
+                        entry("MAX_SESSIONS=%d", maxSessions));
+        return false;
+    }
+
     return sessions_.emplace(session).second;
 }
 
