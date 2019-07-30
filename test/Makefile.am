@@ -15,9 +15,7 @@ check_PROGRAMS = \
 TESTS = $(check_PROGRAMS)
 
 handler_unittest_SOURCES = handler_unittest.cpp
-handler_unittest_LDADD = $(PHOSPHOR_LOGGING_LIBS) \
-			 $(top_builddir)/handler.o
+handler_unittest_LDADD = $(top_builddir)/libhandler.la
 
 handler_session_unittest_SOURCES = handler_session_unittest.cpp
-handler_session_unittest_LDADD = $(PHOSPHOR_LOGGING_LIBS) \
-				 $(top_builddir)/handler.o
+handler_session_unittest_LDADD = $(top_builddir)/libhandler.la
