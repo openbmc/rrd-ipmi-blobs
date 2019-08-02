@@ -48,6 +48,7 @@ bool RrdBlobHandler::open(uint16_t session, uint16_t flags,
         return false;
     }
 
+    log<level::NOTICE>("Opening new session", entry("SESSION=%d", session));
     return sessions_.emplace(session, SessionState{}).second;
 }
 
@@ -103,6 +104,9 @@ bool RrdBlobHandler::write(uint16_t session, uint32_t offset,
 
     if (requiredSize > buffer.size())
     {
+        log<level::NOTICE>("Resizing buffer to accomodate write",
+                           entry("BUFFER_SIZE=%d", buffer.size()),
+                           entry("REQUIRED_SIZE=%d", requiredSize));
         buffer.resize(requiredSize);
     }
 
@@ -133,6 +137,7 @@ bool RrdBlobHandler::close(uint16_t session)
         return false;
     }
 
+    log<level::NOTICE>("Closing session", entry("SESSION=%d", session));
     sessions_.erase(it);
     return true;
 }
