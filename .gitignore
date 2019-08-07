@@ -1,5 +1,4 @@
-# Template from:
-# https://github.com/github/gitignore/blob/master/Autotools.gitignore
+## https://github.com/github/gitignore/blob/master/Autotools.gitignore
 
 # http://www.gnu.org/software/automake
 
@@ -12,13 +11,15 @@ Makefile.in
 
 # http://www.gnu.org/software/autoconf
 
-/autom4te.cache
+autom4te.cache
 /autoscan.log
 /autoscan-*.log
 /aclocal.m4
 /compile
 /config.guess
 /config.h.in
+/config.log
+/config.status
 /config.sub
 /configure
 /configure.scan
@@ -26,7 +27,6 @@ Makefile.in
 /install-sh
 /missing
 /stamp-h1
-/m4
 
 # https://www.gnu.org/software/libtool/
 
@@ -36,30 +36,56 @@ Makefile.in
 
 /texinfo.tex
 
-# Repo Specific Items
-*.o
-*.lo
-/config.h
-/config.h.in~
-/config.log
-/config.status
-Makefile
-.deps
-.dirstamp
-/lib*
-.libs/
-/*-libtool
-.project
-/test/*_unittest
-/test/*.log
-/test/*.trs
+# http://www.gnu.org/software/m4/
 
-# ignore vim swap files
-.*.sw*
-# failures from patch
-*.orig
-*.rej
-# backup files from some editors
-*~
-.cscope/
-build/
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+
+# Generated files
+
+Makefile
+/config.h?
+
+## https://github.com/github/gitignore/blob/master/C++.gitignore
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+## Repo Specific Items
+
+/test/*_unittest
+/test/*.trs
+/test/*.log
