@@ -24,6 +24,10 @@ PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 AC_CHECK_HEADER([blobs-ipmid], [AC_MSG_ERROR(["phosphor-ipmi-blobs required and not found."])])
 AC_CHECK_HEADER([rrd], [AC_MSG_ERROR(["rrdtool required and not found."])])
 
+# Check/set proto tools.
+PKG_CHECK_MODULES([PROTOBUF], [protobuf > 3.0.0])
+AC_CHECK_PROG([PROTOC], [protoc], [protoc], [AC_MSG_ERROR([ProtoBuf compiler "protoc" not found.])])
+
 # Check/set gtest specific functions.
 PKG_CHECK_MODULES([GTEST], [gtest], [], [AC_MSG_NOTICE([gtest not found, tests will not build])])
 PKG_CHECK_MODULES([GMOCK], [gmock], [], [AC_MSG_NOTICE([gmock not found, tests will not build])])

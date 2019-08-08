@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option optimize_for = LITE_RUNTIME;
+
+package rrd;
+
+import "google/protobuf/timestamp.proto";
+
+message Request {
+  oneof method {
+    LastRequest last = 1;
+  }
+}
+
+message LastRequest {
+  string filename = 1;
+}
+
+message Response {
+  oneof method {
+    LastResponse last = 1;
+  }
+}
+
+message LastResponse {
+  google.protobuf.Timestamp time = 1;
+}

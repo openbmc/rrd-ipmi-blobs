@@ -84,6 +84,11 @@ Makefile
 *.out
 *.app
 
+## https://developers.google.com/protocol-buffers/docs/reference/cpp-generated#invocation
+
+*.pb.h
+*.pb.cc
+
 ## Repo Specific Items
 
 /test/*_unittest
