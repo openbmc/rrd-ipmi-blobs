@@ -1,7 +1,10 @@
 #pragma once
 
+#include "service.hpp"
+
 #include <blobs-ipmid/blobs.hpp>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -18,7 +21,10 @@ namespace blobs
 class RrdBlobHandler : public GenericBlobInterface
 {
   public:
-    RrdBlobHandler() = default;
+    explicit RrdBlobHandler(std::shared_ptr<rrd::RrdServiceInterface> rrd) :
+        rrd_(std::move(rrd))
+    {
+    }
     ~RrdBlobHandler() = default;
     RrdBlobHandler(const RrdBlobHandler&) = delete;
     RrdBlobHandler& operator=(const RrdBlobHandler&) = delete;
@@ -50,11 +56,16 @@ class RrdBlobHandler : public GenericBlobInterface
   private:
     struct SessionState
     {
-        std::vector<uint8_t> buffer;
+        std::string request;
+        std::string response;
+        bool committed;
     };
 
-    /* map of sessionId: request/response buffer. */
+    // Map of sessionId: request/response buffer.
     std::unordered_map<uint16_t, SessionState> sessions_;
+
+    // RRD rrd request handler
+    std::shared_ptr<rrd::RrdServiceInterface> rrd_;
 };
 
 } // namespace blobs

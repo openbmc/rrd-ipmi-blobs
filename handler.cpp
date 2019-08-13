@@ -63,7 +63,15 @@ std::vector<uint8_t> RrdBlobHandler::read(uint16_t session, uint32_t offset,
         return {};
     }
 
-    auto& buffer = it->second.buffer;
+    auto& state = it->second;
+
+    if (!state.committed)
+    {
+        log<level::ERR>("Request has not been committed");
+        return {};
+    }
+
+    auto& buffer = state.response;
 
     if (offset >= buffer.size())
     {
@@ -90,7 +98,15 @@ bool RrdBlobHandler::write(uint16_t session, uint32_t offset,
         return false;
     }
 
-    auto& buffer = it->second.buffer;
+    auto& state = it->second;
+
+    if (state.committed)
+    {
+        log<level::ERR>("Request has already been committed");
+        return false;
+    }
+
+    auto& buffer = state.request;
 
     if (offset > buffer.size())
     {
@@ -123,8 +139,24 @@ bool RrdBlobHandler::writeMeta(uint16_t session, uint32_t offset,
 
 bool RrdBlobHandler::commit(uint16_t session, const std::vector<uint8_t>& data)
 {
-    // TODO: implement
-    return false;
+    auto it = sessions_.find(session);
+
+    if (it == sessions_.end())
+    {
+        log<level::ERR>("Session not found", entry("SESSION=%d", session));
+        return false;
+    }
+
+    auto& state = it->second;
+
+    if (!rrd_->handle(state.request, state.response))
+    {
+        log<level::ERR>("Unable to handle request");
+        return false;
+    }
+
+    state.committed = true;
+    return true;
 }
 
 bool RrdBlobHandler::close(uint16_t session)

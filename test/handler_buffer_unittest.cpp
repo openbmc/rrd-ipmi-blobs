@@ -2,6 +2,9 @@
 
 #include <vector>
 
+using ::testing::An;
+using ::testing::Return;
+
 class RrdBlobHandlerBufferTest : public RrdBlobHandlerTest
 {
   protected:
@@ -9,6 +12,12 @@ class RrdBlobHandlerBufferTest : public RrdBlobHandlerTest
 
     void SetUp()
     {
+        ON_CALL(*service, handle(An<const std::string&>(), An<std::string&>()))
+            .WillByDefault([](const std::string& req, std::string& res) {
+                res = req; // Echo request as response
+                return true;
+            });
+
         ASSERT_TRUE(handler.open(sess, openFlags, blobId));
     }
 
@@ -25,9 +34,9 @@ class RrdBlobHandlerBufferTest : public RrdBlobHandlerTest
 //    vector<uint8_t> read(session, offset, requestedSize);
 //
 
-TEST_F(RrdBlobHandlerBufferTest, WriteReadValid)
+TEST_F(RrdBlobHandlerBufferTest, WriteCommitReadValid)
 {
-    // Test write and read in a single session
+    // Test write, commit, and read in a single session
 
     const int chunks = 3;
 
@@ -37,6 +46,9 @@ TEST_F(RrdBlobHandlerBufferTest, WriteReadValid)
             << "Write chunk #" << i;
     }
 
+    ASSERT_TRUE(handler.commit(sess, {}))
+        << "Commit data with dummy echo service";
+
     for (int i = 0; i < chunks; ++i)
     {
         EXPECT_EQ(handler.read(sess, i * data.size(), data.size()), data)
@@ -45,6 +57,29 @@ TEST_F(RrdBlobHandlerBufferTest, WriteReadValid)
 
     EXPECT_EQ(handler.read(sess, chunks * data.size(), 1).size(), 0)
         << "Buffer did not grow past data";
+}
+
+TEST_F(RrdBlobHandlerBufferTest, HandleCommandFlowCheck)
+{
+    // Test that handler enforces required command flow.
+    //
+    //    WRITE -> COMMIT -> READ
+
+    ASSERT_TRUE(handler.write(sess, 0, data)) << "Write some data";
+
+    EXPECT_EQ(handler.read(sess, 0, 1).size(), 0) << "Read before valid commit";
+
+    EXPECT_CALL(*service, handle(An<const std::string&>(), An<std::string&>()))
+        .WillOnce(Return(false)) // Force first service call to fail
+        .WillOnce(Return(true));
+
+    EXPECT_FALSE(handler.commit(sess, {})) << "Commit invalid data";
+
+    EXPECT_EQ(handler.read(sess, 0, 1).size(), 0) << "Read before valid commit";
+
+    ASSERT_TRUE(handler.commit(sess, {})) << "Commit written data";
+
+    EXPECT_FALSE(handler.write(sess, 0, data)) << "Write after valid commit";
 }
 
 TEST_F(RrdBlobHandlerBufferTest, WriteReadBoundaryCheck)
@@ -58,14 +93,16 @@ TEST_F(RrdBlobHandlerBufferTest, WriteReadBoundaryCheck)
 
     EXPECT_FALSE(handler.write(sess, 1, data))
         << "First write not at the beginning of buffer";
-    EXPECT_EQ(handler.read(sess, 0, 1).size(), 0)
-        << "Read data from empty buffer";
 
     ASSERT_TRUE(handler.write(sess, 0, data))
         << "Write sample data at the beginning buffer";
 
     EXPECT_FALSE(handler.write(sess, data.size() + 1, data))
         << "Write after the end of the buffer";
+
+    ASSERT_TRUE(handler.commit(sess, {}))
+        << "Commit data with dummy echo service";
+
     EXPECT_EQ(handler.read(sess, data.size(), 1).size(), 0)
         << "Read starting at the end of buffer";
 
@@ -85,20 +122,29 @@ TEST_F(RrdBlobHandlerBufferTest, WriteReadMultiple)
     EXPECT_TRUE(handler.write(sess, 0, data)) << "Write data";
     EXPECT_TRUE(handler.write(sess2, 0, data2)) << "Write data 2";
 
+    ASSERT_TRUE(handler.commit(sess, {})) << "Commit data";
+    ASSERT_TRUE(handler.commit(sess2, {})) << "Commit data 2";
+
     EXPECT_EQ(handler.read(sess, 0, data.size()), data) << "Verify read";
     EXPECT_EQ(handler.read(sess2, 0, data2.size()), data2) << "Verify read 2";
 
     EXPECT_TRUE(handler.close(sess2)) << "Close session 2";
 }
 
-TEST_F(RrdBlobHandlerBufferTest, WriteReadIdempotent)
+TEST_F(RrdBlobHandlerBufferTest, WriteCommitReadIdempotent)
 {
-    // Test write and read are idempotent under duplicate calls
+    // Test write, commit, and read are idempotent under duplicate calls
 
     for (int i = 0; i < 3; ++i)
     {
         EXPECT_TRUE(handler.write(sess, 0, data))
             << "Write data (x" << i << ")";
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        ASSERT_TRUE(handler.commit(sess, {}))
+            << "Commit data with dummy service (x" << i << ")";
     }
 
     EXPECT_EQ(handler.read(sess, data.size(), 1).size(), 0)
