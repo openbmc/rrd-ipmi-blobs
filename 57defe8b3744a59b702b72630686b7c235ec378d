@@ -1,0 +1,9 @@
+Code-Review+1: Gabriel Matute <gmatute@google.com>
+Code-Review+2: Kun Yi <kunyi731@gmail.com>
+Ok-To-Test+1: Kun Yi <kunyi731@gmail.com>
+Verified+1: Kun Yi <kunyi731@gmail.com>
+Submitted-by: Kun Yi <kunyi731@gmail.com>
+Submitted-at: Thu, 22 Aug 2019 20:36:45 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/rrd-ipmi-blobs/+/24657
+Project: openbmc/rrd-ipmi-blobs
+Branch: refs/heads/master
