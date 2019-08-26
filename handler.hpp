@@ -18,6 +18,13 @@ using std::uint8_t;
 namespace blobs
 {
 
+/**
+ * Implement the IPMI Blob interface to handle RRD requests.
+ *
+ * This handler provides a blob interface to interact with an RRD service,
+ * allowing a client to *write* a request to a temporary buffer, then *commit*
+ * it to the service, and finally *read* a response back.
+ */
 class RrdBlobHandler : public GenericBlobInterface
 {
   public:
@@ -25,12 +32,14 @@ class RrdBlobHandler : public GenericBlobInterface
         rrd_(std::move(rrd))
     {
     }
-    ~RrdBlobHandler() = default;
+
+    // Avoid expensive copies, but allow moves.
     RrdBlobHandler(const RrdBlobHandler&) = delete;
     RrdBlobHandler& operator=(const RrdBlobHandler&) = delete;
     RrdBlobHandler(RrdBlobHandler&&) = default;
     RrdBlobHandler& operator=(RrdBlobHandler&&) = default;
 
+    // Concrete implemention of GenericBlobInterface.
     bool canHandleBlob(const std::string& path) override;
     std::vector<std::string> getBlobIds() override;
     bool deleteBlob(const std::string& path) override;
@@ -48,8 +57,19 @@ class RrdBlobHandler : public GenericBlobInterface
     bool stat(uint16_t session, struct BlobMeta* meta) override;
     bool expire(uint16_t session) override;
 
+    /**
+     * Single, well-known blob id or path that can be handled.
+     */
     static const std::string blobId;
+
+    /**
+     * Limit for concurrent open sessions known to the handler.
+     */
     static constexpr uint16_t maxSessions = 10;
+
+    /**
+     * Bitmask for the minimum flags needed to open a blob.
+     */
     static const uint16_t requiredOpenFlags =
         OpenFlags::read | OpenFlags::write;
 
@@ -61,10 +81,14 @@ class RrdBlobHandler : public GenericBlobInterface
         bool committed;
     };
 
-    // Map of sessionId: request/response buffer.
+    /**
+     * Map from sessionId to all state for a session.
+     */
     std::unordered_map<uint16_t, SessionState> sessions_;
 
-    // RRD rrd request handler
+    /**
+     * RRD service to process requests when committing.
+     */
     std::shared_ptr<rrd::RrdServiceInterface> rrd_;
 };
 
