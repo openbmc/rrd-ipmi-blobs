@@ -73,6 +73,12 @@ bool RrdBlobHandler::stat(const std::string& path, struct BlobMeta* meta)
 bool RrdBlobHandler::open(uint16_t session, uint16_t flags,
                           const std::string& path)
 {
+    if (!canHandleBlob(path))
+    {
+        log<level::ERR>("Invalid path for handler");
+        return false;
+    }
+
     if ((flags & requiredOpenFlags) != requiredOpenFlags)
     {
         log<level::ERR>("Read or write flag not specified when opening");
@@ -86,8 +92,15 @@ bool RrdBlobHandler::open(uint16_t session, uint16_t flags,
         return false;
     }
 
+    if (!sessions_.emplace(session, SessionState{}).second)
+    {
+        log<level::ERR>("Session is already open",
+                        entry("SESSION=%d", session));
+        return false;
+    }
+
     log<level::NOTICE>("Opening new session", entry("SESSION=%d", session));
-    return sessions_.emplace(session, SessionState{}).second;
+    return true;
 }
 
 /**

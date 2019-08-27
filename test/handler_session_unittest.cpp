@@ -23,6 +23,8 @@ TEST_F(RrdBlobHandlerSessionTest, OpenCloseInvalid)
 {
     // Test open and close error checking
 
+    EXPECT_FALSE(handler.open(sess, r | w, "")) << "Reject invalid path";
+
     EXPECT_FALSE(handler.open(sess, 0, blobId)) << "Reject no flags";
     EXPECT_FALSE(handler.open(sess, w, blobId)) << "Reject no read flag";
     EXPECT_FALSE(handler.open(sess, r, blobId)) << "Reject no write flag";
