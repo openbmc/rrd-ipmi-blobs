@@ -293,8 +293,7 @@ bool RrdBlobHandler::stat(uint16_t session, struct BlobMeta* meta)
  */
 bool RrdBlobHandler::expire(uint16_t session)
 {
-    // TODO: implement
-    return false;
+    return close(session);
 }
 
 } // namespace blobs

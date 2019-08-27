@@ -55,3 +55,13 @@ TEST_F(RrdBlobHandlerSessionTest, OpenCloseMultiple)
         }
     }
 }
+
+TEST_F(RrdBlobHandlerSessionTest, ExpireAsClose)
+{
+    // Test expire to have the same side effects as close
+
+    EXPECT_FALSE(handler.expire(sess)) << "Expire unexisting";
+    ASSERT_TRUE(handler.open(sess, r | w, blobId)) << "Open new";
+    EXPECT_TRUE(handler.expire(sess)) << "Expire existing";
+    EXPECT_FALSE(handler.close(sess)) << "Close expired";
+}
