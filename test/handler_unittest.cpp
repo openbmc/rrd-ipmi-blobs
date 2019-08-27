@@ -19,3 +19,15 @@ TEST_F(RrdBlobHandlerTest, GetBlobIds)
     ASSERT_EQ(blobIds.size(), 1) << "Only one well-known blob id";
     EXPECT_EQ(blobIds[0], blobId) << "Blob id matches constant";
 }
+
+TEST_F(RrdBlobHandlerTest, NoDeleteBlob)
+{
+    // Test deleteBlob to always be unsuccessful
+    ASSERT_FALSE(handler.deleteBlob(blobId)) << "Delete blob";
+}
+
+TEST_F(RrdBlobHandlerTest, NoStat)
+{
+    // Test stat to always be unsuccessful
+    ASSERT_FALSE(handler.stat(blobId, nullptr)) << "Stat blob";
+}
