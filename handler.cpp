@@ -278,8 +278,24 @@ bool RrdBlobHandler::close(uint16_t session)
  */
 bool RrdBlobHandler::stat(uint16_t session, struct BlobMeta* meta)
 {
-    // TODO: implement
-    return false;
+    auto it = sessions_.find(session);
+
+    if (it == sessions_.end())
+    {
+        log<level::ERR>("Session not found", entry("SESSION=%d", session));
+        return false;
+    }
+
+    auto& state = it->second;
+
+    if (state.committed)
+    {
+        meta->blobState |= StateFlags::committed;
+        meta->size = state.response.size();
+    }
+
+    // If not committed nothing will be set.
+    return true;
 }
 
 /**
