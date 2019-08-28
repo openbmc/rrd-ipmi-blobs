@@ -11,7 +11,8 @@ check_PROGRAMS = \
 
 handler_unittest_SOURCES = handler_unittest.cpp \
 			   handler_session_unittest.cpp \
-			   handler_buffer_unittest.cpp
+			   handler_buffer_unittest.cpp \
+			   handler_flow_unittest.cpp
 handler_unittest_LDADD = $(top_builddir)/libhandler.la
 
 service_unittest_SOURCES = service_unittest.cpp \

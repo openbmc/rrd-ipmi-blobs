@@ -34,7 +34,7 @@ class RrdBlobHandlerBufferTest : public RrdBlobHandlerTest
 //    vector<uint8_t> read(session, offset, requestedSize);
 //
 
-TEST_F(RrdBlobHandlerBufferTest, WriteCommitReadValid)
+TEST_F(RrdBlobHandlerBufferTest, WriteReadValid)
 {
     // Test write, commit, and read in a single session
 
@@ -57,29 +57,6 @@ TEST_F(RrdBlobHandlerBufferTest, WriteCommitReadValid)
 
     EXPECT_EQ(handler.read(sess, chunks * data.size(), 1).size(), 0)
         << "Buffer did not grow past data";
-}
-
-TEST_F(RrdBlobHandlerBufferTest, HandleCommandFlowCheck)
-{
-    // Test that handler enforces required command flow.
-    //
-    //    WRITE -> COMMIT -> READ
-
-    ASSERT_TRUE(handler.write(sess, 0, data)) << "Write some data";
-
-    EXPECT_EQ(handler.read(sess, 0, 1).size(), 0) << "Read before valid commit";
-
-    EXPECT_CALL(*service, handle(An<const std::string&>(), An<std::string&>()))
-        .WillOnce(Return(false)) // Force first service call to fail
-        .WillOnce(Return(true));
-
-    EXPECT_FALSE(handler.commit(sess, {})) << "Commit invalid data";
-
-    EXPECT_EQ(handler.read(sess, 0, 1).size(), 0) << "Read before valid commit";
-
-    ASSERT_TRUE(handler.commit(sess, {})) << "Commit written data";
-
-    EXPECT_FALSE(handler.write(sess, 0, data)) << "Write after valid commit";
 }
 
 TEST_F(RrdBlobHandlerBufferTest, WriteReadBoundaryCheck)
@@ -129,30 +106,4 @@ TEST_F(RrdBlobHandlerBufferTest, WriteReadMultiple)
     EXPECT_EQ(handler.read(sess2, 0, data2.size()), data2) << "Verify read 2";
 
     EXPECT_TRUE(handler.close(sess2)) << "Close session 2";
-}
-
-TEST_F(RrdBlobHandlerBufferTest, WriteCommitReadIdempotent)
-{
-    // Test write, commit, and read are idempotent under duplicate calls
-
-    for (int i = 0; i < 3; ++i)
-    {
-        EXPECT_TRUE(handler.write(sess, 0, data))
-            << "Write data (x" << i << ")";
-    }
-
-    for (int i = 0; i < 3; ++i)
-    {
-        ASSERT_TRUE(handler.commit(sess, {}))
-            << "Commit data with dummy service (x" << i << ")";
-    }
-
-    EXPECT_EQ(handler.read(sess, data.size(), 1).size(), 0)
-        << "Buffer did not grow past data";
-
-    for (int i = 0; i < 3; ++i)
-    {
-        EXPECT_EQ(handler.read(sess, 0, data.size()), data)
-            << "Verify read (x" << i << ")";
-    }
 }
