@@ -2,6 +2,9 @@
 
 #include <ctime>
 #include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 namespace rrd
 {
@@ -16,6 +19,8 @@ class RrdInterface
 
     // librrd interface, 1:1 mapping to rrd_*_r functions
     virtual time_t last(const std::string& filename) const = 0;
+    virtual std::tuple<time_t, std::vector<std::pair<std::string, std::string>>>
+        lastupdate(const std::string& filename) const = 0;
 };
 
 /**
@@ -26,6 +31,8 @@ class Rrd : public RrdInterface
   public:
     // librrd interface, 1:1 mapping to rrd_*_r functions
     time_t last(const std::string& filename) const override;
+    std::tuple<time_t, std::vector<std::pair<std::string, std::string>>>
+        lastupdate(const std::string& filename) const override;
 };
 
 /**

@@ -24,6 +24,8 @@ class RrdServiceInterface
 
     // RRD interface, 1:1 mapping to librrd methods
     virtual bool last(const LastRequest& req, LastResponse& res) = 0;
+    virtual bool lastupdate(const LastUpdateRequest& req,
+                            LastUpdateResponse& res) = 0;
 };
 
 /**
@@ -43,6 +45,8 @@ class RrdService : public RrdServiceInterface
 
     // RRD interface, 1:1 mapping to librrd methods
     bool last(const LastRequest& req, LastResponse& res) override;
+    bool lastupdate(const LastUpdateRequest& req,
+                    LastUpdateResponse& res) override;
 
   private:
     const RrdInterface* const rrd_;

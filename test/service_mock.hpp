@@ -14,6 +14,8 @@ class RrdServiceMock : public RrdServiceInterface
     MOCK_METHOD2(handle, bool(const Request& req, Response& res));
 
     MOCK_METHOD2(last, bool(const LastRequest& req, LastResponse& res));
+    MOCK_METHOD2(lastupdate,
+                 bool(const LastUpdateRequest& req, LastUpdateResponse& res));
 };
 
 } // namespace rrd
