@@ -9,6 +9,7 @@ import "google/protobuf/timestamp.proto";
 message Request {
   oneof method {
     LastRequest last = 1;
+    LastUpdateRequest last_update = 2;
   }
 }
 
@@ -16,12 +17,27 @@ message LastRequest {
   string filename = 1;
 }
 
+message LastUpdateRequest {
+  string filename = 1;
+}
+
 message Response {
   oneof method {
     LastResponse last = 1;
+    LastUpdateResponse last_update = 2;
   }
 }
 
 message LastResponse {
   google.protobuf.Timestamp time = 1;
+}
+
+message LastUpdateResponse {
+  message DataSource {
+    string name = 1;
+    string last = 2;
+  }
+
+  google.protobuf.Timestamp time = 1;
+  repeated DataSource data_sources = 2;
 }

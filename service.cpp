@@ -45,6 +45,8 @@ bool RrdService::handle(const Request& req, Response& res)
     {
         case Request::kLast:
             return last(req.last(), *res.mutable_last());
+        case Request::kLastUpdate:
+            return lastupdate(req.last_update(), *res.mutable_last_update());
         case Request::METHOD_NOT_SET:
             return false;
     }
@@ -63,6 +65,23 @@ bool RrdService::last(const LastRequest& req, LastResponse& res)
 {
     auto time = rrd_->last(req.filename());
     res.mutable_time()->set_seconds(time);
+    return true;
+}
+
+bool RrdService::lastupdate(const LastUpdateRequest& req,
+                            LastUpdateResponse& res)
+{
+    auto [time, data_sources] = rrd_->lastupdate(req.filename());
+    res.mutable_time()->set_seconds(time);
+
+    res.clear_data_sources();
+    for (auto& ds : data_sources)
+    {
+        auto res_ds = res.add_data_sources();
+        res_ds->set_name(ds.first);
+        res_ds->set_last(ds.second);
+    }
+
     return true;
 }
 

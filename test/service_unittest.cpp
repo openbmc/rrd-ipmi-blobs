@@ -12,6 +12,8 @@ class RrdServiceHandleMock : public RrdService
 
     // Mock every method but the handle overload set.
     MOCK_METHOD2(last, bool(const LastRequest& req, LastResponse& res));
+    MOCK_METHOD2(lastupdate,
+                 bool(const LastUpdateRequest& req, LastUpdateResponse& res));
 };
 } // namespace rrd
 
